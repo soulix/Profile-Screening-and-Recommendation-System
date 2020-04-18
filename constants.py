@@ -79,53 +79,45 @@ date_range =  r"("+start_date+not_alpha_numeric+r"{1,3}"+end_date+r")|("+year_ra
 
 
 
-RESUME_SECTIONS = [
-                    'experience', # start exp
-                    'work experience',
-                    'working experience'
+
+SIMILAR_TO = {
+    'ACADEMICS' : [ 'studies',
+                    'institute', 
+                    'school', 
+                    'college',
+                    'university',
+                    'education',
+                    'qualifications',
+                    'academics'
+                ],
+    
+    'EXPERINCE' : [ 'experience',
+                    'work',
                     'projects',
-                    'project experience',
                     'professional experience',
                     'employment history',
-                    'job',
                     'duties',
                     'internship', 
                     'training',
                     'research',
-                    'career',
-                    'profession',
-                    'role'
-                    'project',
+                    'roles',
                     'responsibility', 
-                    'description',
-                    'workshop',
-                    'professional working experience ',
-                    'conference', # end exp                     
-                    'study',      #start academics 
-                    'institute', 
-                    'school', 
-                    'college',
-                    'education',
-                    'academic credentials',
-                    'academics',
-                    'educatinal details', #end academics
-                    'skills',  #start skill
+                    'conference',
+                    'work experience'
+                ],
+    
+    'SKILLS' : [    'skills',
                     'key skills',
                     'languages', 
                     'technology', 
                     'framework', 
                     'tools', 
                     'certifications',
-                    'database' #end skills
-                    'introduction', #intro start
-                    'intro',    
-                    'introduction',
-                    'objective',
-                    'objectives',
-                    'career objective',
-                    'summary',
-                    'profile summary' #intro end
-                    'achievement',   #extra start
+                    'database',
+                    'proficiency'
+            ],
+    
+    'EXTRA' : [     'achievement',
                     'hobby', 
                     'links',
                     'additional', 
@@ -139,33 +131,10 @@ RESUME_SECTIONS = [
                     'accolades',
                     'achivements',
                     'accomplishments',
-                    'interests' #extra end
-                   
-                ]
+                    'interests'
+            ]
+}
 
-RESUME_SECTIONS_EXPERINCE = [
-                    'experience', # start exp
-                    'work experience',
-                    'working experience'
-                    'projects',
-                    'project experience',
-                    'professional experience',
-                    'employment history',
-                    'job',
-                    'duties',
-                    'internship', 
-                    'training',
-                    'research',
-                    'career',
-                    'profession',
-                    'role'
-                    'project',
-                    'responsibility', 
-                    'description',
-                    'workshop',
-                    'professional working experience ',
-                    'conference', # end exp      
-                ]
 
 COMPETENCIES = {
     'teamwork': [
@@ -322,11 +291,8 @@ COMPETENCIES = {
         'launch',
         'pioneer',
         'institute'
-    ]
-}
-
-MEASURABLE_RESULTS = {
-    'metrics': [
+    ],
+     'metrics': [
         'saved',
         'increased',
         '$ ',
@@ -561,3 +527,5 @@ MEASURABLE_RESULTS = {
         'created'
     ]
 }
+
+
