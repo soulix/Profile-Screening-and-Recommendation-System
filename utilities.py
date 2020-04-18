@@ -137,7 +137,7 @@ def calculate_experience(resume_text):
           current_month = cs.get_month_index(month_result.group())
           if (start_month == -1) or (current_month < start_month):
             start_month = current_month
-      if date_range.lower().find('present') != -1:
+      if date_range.lower().find('present' or 'current') != -1:
         end_month = date.today().month # current month
         end_year = date.today().year # current year
       else:
@@ -193,7 +193,7 @@ resume specifically for professionals/freshers
 :return: dictionary of entities
 '''
 
-def extract_entity_sections(text):
+def extract_academics(text):
 
     text_split = [i.strip() for i in text.split('\n')]
     entities = {}
@@ -202,12 +202,34 @@ def extract_entity_sections(text):
         if len(phrase) == 1:
             p_key = phrase
         else:
-            p_key = set(phrase.lower().split()) & set(cs.RESUME_SECTIONS_EXPERINCE)
+            p_key = set(phrase.lower().split()) & set(cs.SIMILAR_TO['ACADEMICS'])
         try:
             p_key = list(p_key)[0]
         except IndexError:
             pass
-        if p_key in cs.RESUME_SECTIONS_EXPERINCE:
+        if p_key in cs.SIMILAR_TO['ACADEMICS']:
+            entities[p_key] = []
+            key = p_key
+        elif key and phrase.strip():
+            entities[key].append(phrase)
+    return entities
+
+
+def extract_experience(text):
+
+    text_split = [i.strip() for i in text.split('\n')]
+    entities = {}
+    key = False
+    for phrase in text_split:
+        if len(phrase) == 1:
+            p_key = phrase
+        else:
+            p_key = set(phrase.lower().split()) & set(cs.SIMILAR_TO['EXPERINCE'])
+        try:
+            p_key = list(p_key)[0]
+        except IndexError:
+            pass
+        if p_key in cs.SIMILAR_TO['EXPERINCE']:
             entities[p_key] = []
             key = p_key
         elif key and phrase.strip():
@@ -216,6 +238,26 @@ def extract_entity_sections(text):
 
 
 
+def extract_extras(text):
+
+    text_split = [i.strip() for i in text.split('\n')]
+    entities = {}
+    key = False
+    for phrase in text_split:
+        if len(phrase) == 1:
+            p_key = phrase
+        else:
+            p_key = set(phrase.lower().split()) & set(cs.SIMILAR_TO['EXTRA'])
+        try:
+            p_key = list(p_key)[0]
+        except IndexError:
+            pass
+        if p_key in cs.SIMILAR_TO['EXTRA']:
+            entities[p_key] = []
+            key = p_key
+        elif key and phrase.strip():
+            entities[key].append(phrase)
+    return entities
 
 
 
@@ -247,8 +289,8 @@ def fetch_qualifications(resume_text):
 
 
 
-#### qualifications exception when there is no education present into resume sections
-def fetch_qualifications_update(resume_sections,text):
+#### qualifications exception when there is no education present into resume:education sections
+def find_qualifications(resume_sections,text):
      if 'education' in resume_sections:
          qualifications =  fetch_qualifications(str(resume_sections['education']))
          return(qualifications)
@@ -258,33 +300,18 @@ def fetch_qualifications_update(resume_sections,text):
         
 
 
-def work_experience(resume_sections):
-     if 'experience' in resume_sections and 'projects' in resume_sections:
-         project_experience =  resume_sections['experience'] + resume_sections['projects']
-         return(project_experience)
-     elif 'experience' in resume_sections and 'projects' not in resume_sections:
-           project_experience =  resume_sections['experience']
-           return(project_experience)
-     elif 'experience' not in resume_sections and 'projects' in resume_sections:
-           project_experience =  resume_sections['projects']
-           return(project_experience)
-     else:
-           return("")
-    
 
-
-def extract_competencies(text, experience_list):
+def find_competencies(text):
     '''
     Helper function to extract competencies from resume text
     :param resume_text: Plain resume text
     :return: dictionary of competencies
     '''
-    experience_text = ' '.join(experience_list)
     competency_dict = {}
 
     for competency in cs.COMPETENCIES.keys():
         for item in cs.COMPETENCIES[competency]:
-            if string_found(item, experience_text):
+            if string_found(item,text):
                 if competency not in competency_dict.keys():
                     competency_dict[competency] = [item]
                 else:
@@ -293,22 +320,19 @@ def extract_competencies(text, experience_list):
     return competency_dict
 
 
-def extract_measurable_results(text, experience_list):
-    '''
-    Helper function to extract measurable results from resume text
-    :param resume_text: Plain resume text
-    :return: dictionary of measurable results
-    '''
 
-    # we scan for measurable results only in first half of each sentence
-    experience_text = ' '.join([text[:len(text) // 2 - 1] for text in experience_list])
-    mr_dict = {}
+def countWords(line: str) -> int:
+    """
+    Counts the numbers of words in a line
+    :param line: line to count
+    :return count: num of lines
+    """
+    count = 0
+    is_space = False
+    for c in line:
+        is_not_char = not c.isspace()
+        if is_space and is_not_char:
+            count += 1
+        is_space = not is_not_char
+    return count
 
-    for mr in cs.MEASURABLE_RESULTS.keys():
-        for item in cs.MEASURABLE_RESULTS[mr]:
-            if string_found(item, experience_text):
-                if mr not in mr_dict.keys():
-                    mr_dict[mr] = [item]
-                else:
-                    mr_dict[mr].append(item)
-    return mr_dict
