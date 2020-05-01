@@ -5,10 +5,10 @@ Created on Mon Feb 10 00:41:01 2020
 
 @author: subha
 """
-#import nltk
+import nltk
 from nltk.corpus import stopwords
 
-# #if not aleady download, plz load it
+# # #if not aleady download, plz load it
 # nltk.download('stopwords')
 # nltk.download('punkt')
 # nltk.download('wordnet')
@@ -18,7 +18,24 @@ STOPWORDS = set(stopwords.words('english'))
 # LINES_FRONT = 3
 # LINES_BACK = 3
 
-#NAME_PATTERN      = [{'POS': 'PROPN'}, {'POS': 'PROPN'}]
+
+
+csv_file = "resume.csv"
+csv_columns = ['filename','phone_number', 'email','academics','qualifications',
+               'total_exp','skills','work_exp','teamwork','communication',
+               'analytical','result_driven','leadership','metrics','action_words','weak_words']
+        
+
+num2words = {1: 'One', 2: 'Two', 3: 'Three', 4: 'Four', 5: 'Five', \
+             6: 'Six', 7: 'Seven', 8: 'Eight', 9: 'Nine', 10: 'Ten', \
+            11: 'Eleven', 12: 'Twelve', 13: 'Thirteen', 14: 'Fourteen', \
+            15: 'Fifteen', 16: 'Sixteen', 17: 'Seventeen', 18: 'Eighteen', \
+            19: 'Nineteen', 20: 'Twenty', 30: 'Thirty', 40: 'Forty', \
+            50: 'Fifty', 60: 'Sixty', 70: 'Seventy', 80: 'Eighty', \
+            90: 'Ninety', 0: 'Zero'}
+
+
+NAME_PATTERN      = [{'POS': 'PROPN'}, {'POS': 'PROPN'}]
 # Regular expressinos used
 bullet = r"\(cid:\d{0,2}\)"
 #Education (Upper Case Mandatory)
@@ -27,7 +44,9 @@ EDUCATION         = [
                     'SSC', 'HSC', 'CBSE', 'ICSE', 'X', 'XII' , 'Bachelor of Arts','Bachelor of Science',
                     'Bachelor of Technology','Master of Technology','Master of Science','B.Tech.','B.Tech',
                     'M.Tech.','M.Tech',  'B.Sc','M.Sc','BA','MA','B.A','M.A', 'Bachelor of Commerce', 'B.Com'
-                    'Master of Commerce','M.Com', 'B.Com.','M.Com.'
+                    'Master of Commerce','M.Com', 'B.Com.','M.Com.','Doctor of Philosophy','PhD','Ph.D.',
+                    'DPhil','PHD','Ph.D' ,'Ed.D.', 'MCA','Master of Computer Applications',
+                    'BCA','Bachelor of Computer Applications', 'MBA'
                     ]
 
 NOT_ALPHA_NUMERIC = r'[^a-zA-Z\d]'
@@ -114,23 +133,17 @@ SIMILAR_TO = {
                     'tools', 
                     'certifications',
                     'database',
-                    'proficiency'
+                    'proficiency',
+                    'Technology Stack'
             ],
     
-    'EXTRA' : [     'achievement',
-                    'hobby', 
-                    'links',
+    'EXTRA' : [     'achievements',
                     'additional', 
-                    'personal',
-                    'award',
+                    'awards',
                     'miscellaneous', 
-                    'interest',
                     'publications',
                     'others',
-                    'additional information',
                     'accolades',
-                    'achivements',
-                    'accomplishments',
                     'interests'
             ]
 }
