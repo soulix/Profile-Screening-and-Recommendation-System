@@ -6,22 +6,31 @@ Created on Sun Mar 29 12:33:13 2020
 @author: subha
 """
 
-import io, os, subprocess, code, glob, re, traceback, sys, inspect
-import json, re, pickle,logging, nltk ,spacy,string ,tika ,zipfile
+
 # import string
 # import pandas as pd
-from spacy.matcher import Matcher
+#from spacy.matcher import Matcher
 from nltk.stem import WordNetLemmatizer
 #from nltk.stem.snowball import SnowballStemmer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-from datetime import datetime
-from dateutil import relativedelta
-from collections import Counter, defaultdict
+#from datetime import datetime
+#from dateutil import relativedelta
+from collections import Counter
 import constants as cs
 #from collections import defaultdict
-import logging
 from datetime import date
+import io, os, subprocess, code, glob, re, traceback, sys, inspect
+import json, re, pickle,logging, nltk ,spacy,string ,tika ,zipfile,csv
+from nltk.stem import WordNetLemmatizer
+from nltk import word_tokenize
+from nltk.corpus import stopwords
+stop_words_ = set(stopwords.words('english'))
+import en_core_web_sm
+nlp = en_core_web_sm.load()
+#nlp = spacy.load('en_core_web_sm')
+wordnet_lemmatizer = WordNetLemmatizer()
+
 
 def string_found(string1, string2):
     if re.search(r"\b" + re.escape(string1) + r"\b", string2):
@@ -165,25 +174,7 @@ returns: cleaned text ready for processing
 """
 ## initialise the inbuilt Stemmer and the Lemmatizer
 
-wordnet_lemmatizer = WordNetLemmatizer()
-def clean_text(document):
-    'changes document to lower case, removes stopwords and lemmatizes the remainder of the sentence'
 
-    # change sentence to lower case
-    document = document.lower()
-    
-    # tokenize into words
-    words = word_tokenize(document)
-
-    # remove stop words
-    words = [word for word in words if word not in stopwords.words("english")]
-    
-    words = [wordnet_lemmatizer.lemmatize(word, pos='v') for word in words]
-
-    # join words to make sentence
-    document = " ".join(words)
-
-    return document
 
 
 '''
@@ -290,9 +281,11 @@ def fetch_qualifications(resume_text):
 
 
 #### qualifications exception when there is no education present into resume:education sections
-def find_qualifications(resume_sections,text):
-     if 'education' in resume_sections:
-         qualifications =  fetch_qualifications(str(resume_sections['education']))
+def find_qualifications(academics,text):
+     if len(academics) != 0 :
+         qualifications =  fetch_qualifications(str(academics))
+         if len(qualifications) == 0:
+             qualifications = fetch_qualifications(text)            
          return(qualifications)
      else:
          qualifications = fetch_qualifications(text)
@@ -336,3 +329,116 @@ def countWords(line: str) -> int:
         is_space = not is_not_char
     return count
 
+
+def skill_catalog(skills):
+    skills = ','.join(map(str, skills))
+    skills = skills.split(",")
+    removeable = str.maketrans('', '', "[]''")
+    skills = [s.translate(removeable) for s in skills]
+    skills = [x.strip(' ') for x in skills]
+    skills = getUniqueWords(skills)
+    return skills
+
+
+
+def position_catalog(position):
+    position = position.str.lower().drop_duplicates().values.tolist()
+    position = ','.join(map(str, position))
+    position = position.split(",")
+    removeable = str.maketrans('', '', "[]''")
+    position = [s.translate(removeable) for s in position]
+    position = [x.strip(' ') for x in position]
+    position = getUniqueWords(position)
+    return position
+
+
+
+def getUniqueWords(allWords) :
+    uniqueWords = [] 
+    for i in allWords:
+        if not i in uniqueWords:
+            uniqueWords.append(i)
+    return uniqueWords
+
+
+def find_skills(doc,skills):
+        """
+        Helper function to extract skills from spacy nlp text
+        :param doc: object of `spacy.tokens.doc.Doc`
+        :return: list of skills extracted
+        """
+        tokens = [token.text for token in doc if not token.is_stop]
+        skillset = []
+        # check for one-grams
+        for token in tokens:
+            if token.lower() in skills:
+                skillset.append(token)
+        # check for bi-grams and tri-grams
+        for token in doc.noun_chunks:
+            token = token.text.lower().strip()
+            if token in skills:
+                skillset.append(token)
+        return [i.capitalize() for i in set([i.lower() for i in skillset])]
+
+
+
+def n2w(n):
+    try:
+      return (cs.num2words[n])
+    except KeyError:
+         try:
+            return (cs.num2words[n-n%10] + cs.num2words[n%10].lower())
+         except KeyError:
+             return ('Number out of range')
+             
+             
+             
+
+
+def export_to_csv(dict):   
+    try:
+        with open(cs.csv_file, 'w') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames= cs.csv_columns)
+            writer.writeheader()
+            for data in dict:
+                writer.writerow(data)
+    except IOError:
+        print("I/O error")
+ 
+def black_txt(token):
+    return  token not in stop_words_ and token not in list(string.punctuation)  and len(token)>2   
+
+def clean_str(string):
+    """
+    Tokenization/string cleaning for all datasets .
+    Every dataset is lower cased  
+    """
+    string = re.sub("'", "",string)
+    string = re.sub("(\\d|\\W)+"," ",string) 
+    string = string.replace("nbsp", "")
+    string = re.sub(r"[^A-Za-z0-9(),!?\'\`]", " ", string)     
+    string = re.sub(r"\'s", " \'s", string) 
+    string = re.sub(r"\'ve", " \'ve", string) 
+    string = re.sub(r"n\'t", " n\'t", string) 
+    string = re.sub(r"\'re", " \'re", string) 
+    string = re.sub(r"\'d", " \'d", string) 
+    string = re.sub(r"\'ll", " \'ll", string) 
+    string = re.sub(r",", " , ", string) 
+    string = re.sub(r"!", " ! ", string)  
+    string = re.sub(r"\?", " \? ", string) 
+    string = re.sub(r"\s{2,}", " ", string) 
+    string = string.lower()
+    return string.strip()
+  
+def normalize(text):
+  clean_text = []
+  clean_text_two = []
+  text = clean_str(text)
+  clean_text = [ wordnet_lemmatizer.lemmatize(word, pos="v") for word in word_tokenize(text.lower()) if black_txt(word)]
+  clean_text_two = [word for word in clean_text if black_txt(word)]
+  return " ".join(clean_text_two)
+
+
+             
+
+           
